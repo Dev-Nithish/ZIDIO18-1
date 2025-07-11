@@ -1,10 +1,11 @@
 // backend/server.js
 
-const express = require('express');
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const cors = require('cors');
-
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import authRoutes from './routes/authRoutes.js'; // Must include .js extension for ES Modules
+import uploadRoute from './routes/upload.js'; // Add this line
 dotenv.config();
 
 const app = express();
@@ -14,7 +15,8 @@ app.use(cors());
 app.use(express.json()); // To parse JSON bodies
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoute);
 
 // Connect to MongoDB and start server
 const PORT = process.env.PORT || 5000;

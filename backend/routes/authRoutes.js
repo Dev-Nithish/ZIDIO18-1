@@ -1,27 +1,50 @@
-// backend/routes/authRoutes.js
+// backend/routes/authRoutes.js or .ts (ES Module version)
 
-const express = require('express');
+import express from 'express';
 const router = express.Router();
 
-const {
-  signup,
-  login,
-  getCurrentUser,
-} = require('../controllers/authController');
+// Dummy admin/user registration controller
+const registerController = async (req, res) => {
+  const { name = 'Admin User', email, password } = req.body;
 
-const { protect } = require('../middleware/authMiddleware');
-const { isAdmin } = require('../middleware/roleMiddleware');
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
 
-// Public routes
-router.post('/signup', signup);
-router.post('/login', login);
+  // Dummy success response
+  res.status(201).json({
+    message: 'Account created successfully.',
+    user: {
+      id: 'admin123',
+      name,
+      email,
+      role: 'admin',
+    },
+    token: 'mocked.jwt.token'
+  });
+};
 
-// Protected route: get logged-in user's data
-router.get('/user', protect, getCurrentUser);
+// Dummy login controller
+const loginController = async (req, res) => {
+  const { email, password } = req.body;
 
-// Example admin-only route (optional)
-router.get('/admin-only', protect, isAdmin, (req, res) => {
-  res.json({ message: 'Admin access granted.' });
-});
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required' });
+  }
 
-module.exports = router;
+  res.status(200).json({
+    message: 'Login successful.',
+    user: {
+      id: 'user123',
+      name: 'John Doe',
+      email,
+      role: email === 'admin@example.com' ? 'admin' : 'user'
+    },
+    token: 'mocked.jwt.token'
+  });
+};
+
+router.post('/register', registerController);
+router.post('/login', loginController);
+
+export default router;
