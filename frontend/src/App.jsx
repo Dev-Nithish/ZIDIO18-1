@@ -9,6 +9,7 @@ import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import UploadPage from './components/UploadPage';
 
 function App() {
   return (
@@ -32,16 +33,11 @@ function App() {
                   </ProtectedRoute>
                 } 
               />
-              <Route 
+                  <Route 
                 path="/upload" 
                 element={
                   <ProtectedRoute>
-                    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center">
-                      <div className="text-center">
-                        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Upload Page</h1>
-                        <p className="text-slate-600 dark:text-slate-400">Coming soon...</p>
-                      </div>
-                    </div>
+                    <UploadPage />
                   </ProtectedRoute>
                 } 
               />

@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  loginUser,
+  registerUser,
+  getCurrentUser,
+} from '../services/authService'; // Adjust the path as needed
 
 const AuthContext = createContext();
 
@@ -14,111 +19,87 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // User login
+  // Login for user or admin (API-based)
   const userLogin = async (email, password) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockUser = {
-      id: 1,
-      name: 'John Doe',
-      email: email,
-      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-      role: 'user',
-      type: 'user'
-    };
-    
-    setUser(mockUser);
-    setIsLoading(false);
-    return mockUser;
-  };
-
-  // Admin login
-  const adminLogin = async (email, password) => {
-    setIsLoading(true);
-    // Simulate API call with additional security checks
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock admin validation - in real app, this would be more secure
-    if (!email.includes('admin') || password.length < 8) {
+    try {
+      const { user, token } = await loginUser({ email, password });
+      localStorage.setItem('auth_token', token);
+      setUser(user);
+      return user;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Login failed');
+    } finally {
       setIsLoading(false);
-      throw new Error('Invalid admin credentials');
     }
-    
-    const mockAdmin = {
-      id: 2,
-      name: 'Admin User',
-      email: email,
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-      role: 'admin',
-      type: 'admin',
-      permissions: ['user_management', 'system_config', 'advanced_analytics']
-    };
-    
-    setUser(mockAdmin);
-    setIsLoading(false);
-    return mockAdmin;
   };
 
-  // Legacy login method for backward compatibility
-  const login = async (email, password) => {
-    return userLogin(email, password);
+  const adminLogin = async (email, password) => {
+    return userLogin(email, password); // Backend determines role
   };
 
+  // Registration
   const register = async (name, email, password) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const mockUser = {
-      id: Date.now(),
-      name: name,
-      email: email,
-      avatar: 'https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-      role: 'user',
-      type: 'user'
-    };
-    
-    setUser(mockUser);
-    setIsLoading(false);
-    return mockUser;
+    try {
+      const { user, token } = await registerUser({ name, email, password });
+      localStorage.setItem('auth_token', token);
+      setUser(user);
+      return user;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
+    localStorage.removeItem('auth_token');
     setUser(null);
   };
 
-  // Check if user has specific permission
   const hasPermission = (permission) => {
     if (!user) return false;
     if (user.role === 'admin') return true;
     return user.permissions?.includes(permission) || false;
   };
 
-  // Check if user is admin
   const isAdmin = () => {
-    return user?.role === 'admin' || user?.type === 'admin';
+    return user?.role === 'admin';
   };
 
-  // Check if user is regular user
   const isUser = () => {
-    return user?.role === 'user' || user?.type === 'user';
+    return user?.role === 'user';
   };
+
+  // Auto-login on page refresh if token exists
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      getCurrentUser(token)
+        .then(({ user }) => setUser(user))
+        .catch(() => {
+          localStorage.removeItem('auth_token');
+          setUser(null);
+        });
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      userLogin, 
-      adminLogin, 
-      login, // Keep for backward compatibility
-      register, 
-      logout, 
-      isLoading,
-      hasPermission,
-      isAdmin,
-      isUser
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userLogin,
+        adminLogin,
+        login: userLogin, // For backward compatibility
+        register,
+        logout,
+        isLoading,
+        hasPermission,
+        isAdmin,
+        isUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
