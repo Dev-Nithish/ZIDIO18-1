@@ -1,15 +1,15 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 const AdminRoute = ({ children }) => {
-  const { user, isAdmin } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/auth" replace />;
   }
   
-  if (!isAdmin()) {
+  if (user?.role !== 'admin') {
     return <Navigate to="/dashboard" replace />;
   }
   

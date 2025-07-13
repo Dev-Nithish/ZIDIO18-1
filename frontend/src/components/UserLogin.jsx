@@ -1,186 +1,128 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, Loader2, BarChart3, User } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { User, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 const UserLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
-  const { userLogin, isLoading } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
 
-  const validateForm = () => {
-    const newErrors = {};
-    
-    if (!email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Please enter a valid email';
+  const theme = {
+    background: darkMode ? 'bg-slate-900' : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100',
+    card: darkMode ? 'bg-slate-800/80 border-slate-700' : 'bg-white/80 backdrop-blur-sm border-white/20',
+    text: {
+      primary: darkMode ? 'text-white' : 'text-slate-900',
+      secondary: darkMode ? 'text-slate-300' : 'text-slate-600'
     }
-    
-    if (!password) {
-      newErrors.password = 'Password is required';
-    } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     
-    if (!validateForm()) return;
-    
-    try {
-      await userLogin(email, password);
+    // Simulate login
+    setTimeout(() => {
+      login({ id: 1, name: 'Demo User', email });
       navigate('/dashboard');
-    } catch (error) {
-      setErrors({ submit: 'Invalid credentials. Please try again.' });
-    }
+      setLoading(false);
+    }, 1000);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex items-center justify-center p-4">
+    <div className={`min-h-screen transition-all duration-500 ${theme.background} flex items-center justify-center p-6`}>
       <div className="w-full max-w-md">
-        {/* Logo and Branding */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg mb-4">
-            <BarChart3 className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-            Excel Analytics
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400">
-            Sign in to your account
-          </p>
-          <div className="flex items-center justify-center mt-3 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
-            <User className="w-4 h-4 text-blue-600 dark:text-blue-400 mr-2" />
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-              User Portal
-            </span>
-          </div>
-        </div>
+        {/* Back Button */}
+        <Link
+          to="/auth"
+          className={`inline-flex items-center space-x-2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors duration-300 mb-8`}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to options</span>
+        </Link>
 
-        {/* Login Card */}
-        <div className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-xl border border-white/20 dark:border-slate-700/20 rounded-2xl shadow-xl p-8">
+        {/* Login Form */}
+        <div className={`${theme.card} border rounded-3xl p-8 shadow-2xl`}>
+          <div className="text-center mb-8">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <User className="w-8 h-8 text-white" />
+            </div>
+            <h2 className={`text-2xl font-bold ${theme.text.primary} mb-2`}>
+              Welcome Back
+            </h2>
+            <p className={`${theme.text.secondary}`}>
+              Sign in to your account
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
                 Email Address
               </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`w-full pl-11 pr-4 py-3 border rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.email ? 'border-red-300 dark:border-red-600' : 'border-slate-200 dark:border-slate-600'
-                  }`}
-                  placeholder="Enter your email"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400 animate-fade-in">
-                  {errors.email}
-                </p>
-              )}
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`w-full px-4 py-3 rounded-xl border transition-all duration-300 ${
+                  darkMode 
+                    ? 'bg-slate-700 border-slate-600 text-white focus:border-blue-500' 
+                    : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
+                placeholder="Enter your email"
+                required
+              />
             </div>
 
-            {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              <label className={`block text-sm font-medium ${theme.text.primary} mb-2`}>
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
                 <input
-                  id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full pl-11 pr-11 py-3 border rounded-xl bg-white/50 dark:bg-slate-700/50 backdrop-blur-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-300 dark:border-red-600' : 'border-slate-200 dark:border-slate-600'
-                  }`}
+                  className={`w-full px-4 py-3 pr-12 rounded-xl border transition-all duration-300 ${
+                    darkMode 
+                      ? 'bg-slate-700 border-slate-600 text-white focus:border-blue-500' 
+                      : 'bg-white border-slate-300 text-slate-900 focus:border-blue-500'
+                  } focus:ring-2 focus:ring-blue-500/20 focus:outline-none`}
                   placeholder="Enter your password"
+                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                  className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme.text.secondary} hover:${theme.text.primary} transition-colors duration-300`}
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400 animate-fade-in">
-                  {errors.password}
-                </p>
-              )}
             </div>
 
-            {/* Submit Error */}
-            {errors.submit && (
-              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <p className="text-sm text-red-600 dark:text-red-400">{errors.submit}</p>
-              </div>
-            )}
-
-            {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-800 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-600 text-white py-3 rounded-xl font-semibold transition-all duration-300 hover:from-blue-600 hover:to-cyan-700 hover:scale-105 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                  Signing in...
-                </div>
-              ) : (
-                'Sign In'
-              )}
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
-
-            {/* Register Link */}
-            <div className="text-center">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Don't have an account?{' '}
-                <Link
-                  to="/register"
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-                >
-                  Create one now
-                </Link>
-              </p>
-            </div>
-
-            {/* Admin Login Link */}
-            <div className="text-center pt-4 border-t border-slate-200 dark:border-slate-700">
-              <p className="text-sm text-slate-600 dark:text-slate-400">
-                Administrator?{' '}
-                <Link
-                  to="/admin/login"
-                  className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium transition-colors"
-                >
-                  Admin Portal
-                </Link>
-              </p>
-            </div>
           </form>
-        </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Secure login powered by advanced encryption
-          </p>
+          <div className="mt-6 text-center">
+            <p className={`text-sm ${theme.text.secondary}`}>
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-500 hover:text-blue-600 font-medium">
+                Sign up
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

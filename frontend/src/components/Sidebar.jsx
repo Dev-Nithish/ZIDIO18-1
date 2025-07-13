@@ -192,17 +192,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             {isOpen && (
               <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
                 <div className="flex items-center">
-                  <img
-                    src={user?.avatar}
-                    alt={user?.name}
-                    className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-700 mr-3"
-                  />
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm mr-3">
+                    {user?.name?.charAt(0) || 'U'}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
-                      {user?.name}
+                      {user?.name || 'Demo User'}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                      {user?.role}
+                      {user?.role || 'user'}
                     </p>
                   </div>
                 </div>
