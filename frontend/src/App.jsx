@@ -6,7 +6,7 @@ import AuthSelector from './components/AuthSelector';
 import UserLogin from './components/UserLogin';
 import AdminLogin from './components/AdminLogin';
 import Register from './components/Register';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 

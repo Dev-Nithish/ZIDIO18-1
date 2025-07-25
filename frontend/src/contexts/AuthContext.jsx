@@ -36,30 +36,39 @@ export const AuthProvider = ({ children }) => {
 
   // Admin login
   const adminLogin = async (email, password) => {
-    setIsLoading(true);
-    // Simulate API call with additional security checks
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock admin validation - in real app, this would be more secure
-    if (!email.includes('admin') || password.length < 8) {
-      setIsLoading(false);
-      throw new Error('Invalid admin credentials');
+  setIsLoading(true);
+
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Login failed');
     }
-    
-    const mockAdmin = {
-      id: 2,
-      name: 'Admin User',
-      email: email,
-      avatar: 'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=64&h=64&dpr=2',
-      role: 'admin',
-      type: 'admin',
-      permissions: ['user_management', 'system_config', 'advanced_analytics']
+
+    // Save token (optional: for future protected API requests)
+    localStorage.setItem('token', data.token);
+
+    const adminUser = {
+      ...data.user,
+      type: 'admin' // required for your isAdmin() helper
     };
-    
-    setUser(mockAdmin);
+
+    setUser(adminUser);
     setIsLoading(false);
-    return mockAdmin;
-  };
+    return adminUser;
+  } catch (error) {
+    setIsLoading(false);
+    throw error;
+  }
+};
 
   // Legacy login method for backward compatibility
   const login = async (email, password) => {
